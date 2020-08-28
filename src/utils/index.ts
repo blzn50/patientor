@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { NewPatient, Gender } from '../types';
+import { NewPatient, Gender } from '../types'; // => returns boolean
 
-/* Type Guard */
-const isString = (text: any): text is string => {
+/* Type Guard */ const isString = (text: any): text is string => {
   return typeof text === 'string' || text instanceof String;
 };
 
@@ -10,7 +11,6 @@ const isDate = (date: string): boolean => {
   return Boolean(Date.parse(date));
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isGender = (gender: any): gender is Gender => {
   return Object.values(Gender).includes(gender);
 };
@@ -38,7 +38,7 @@ const parseOccupation = (occupation: any): string => {
 };
 
 const parseDateOfBirth = (dateOfBirth: any): string => {
-  if (!dateOfBirth || !isString(dateOfBirth) || isDate(dateOfBirth)) {
+  if (!dateOfBirth || !isString(dateOfBirth) || !isDate(dateOfBirth)) {
     throw new Error(`Incorrect or missing date of birth: ${dateOfBirth}`);
   }
   return dateOfBirth;
@@ -51,10 +51,15 @@ const parseGender = (gender: any): Gender => {
   return gender;
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const toNewPatient = (object: any): NewPatient => {
-  const newPatient: NewPatient = {};
-
-  return newPatient;
+  return {
+    name: parseName(object.name),
+    ssn: parseSSN(object.ssn),
+    occupation: parseOccupation(object.occupation),
+    dateOfBirth: parseDateOfBirth(object.dateOfBirth),
+    gender: parseGender(object.gender),
+  };
 };
 
 export default toNewPatient;

@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import patientData from '../../data/patients';
 
-import { Patient, PatientWithoutSSN, NewPatient, Gender } from '../types';
+import { Patient, PatientWithoutSSN, NewPatient } from '../types';
 
 const patients: Array<Patient> = patientData;
 
@@ -19,13 +19,13 @@ const getPatientsWithSSN = (): PatientWithoutSSN[] => {
   }));
 };
 
-const addPatient = (obj: any): NewPatient => {
-  // const newPatient = {
-  //   id: randomBytes(16).toString(),
-  //   ...obj
-  // };
-  // patients.push(newPatient);
-  // return newPatient;
+const addPatient = (entry: NewPatient): Patient => {
+  const newPatient = {
+    id: randomBytes(8).toString('hex'),
+    ...entry,
+  };
+  patients.push(newPatient);
+  return newPatient;
 };
 
-export default { getPatients, getPatientsWithSSN };
+export default { getPatients, getPatientsWithSSN, addPatient };
