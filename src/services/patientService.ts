@@ -19,6 +19,10 @@ const getPatientsWithSSN = (): PatientWithoutSSN[] => {
   }));
 };
 
+const getSinglePatientWithSSN = (id: string): PatientWithoutSSN | undefined => {
+  return patients.find((p) => p.id === id);
+};
+
 const addPatient = (entry: NewPatient): Patient => {
   const newPatient = {
     id: randomBytes(8).toString('hex'),
@@ -28,4 +32,4 @@ const addPatient = (entry: NewPatient): Patient => {
   return newPatient;
 };
 
-export default { getPatients, getPatientsWithSSN, addPatient };
+export default { getPatients, getPatientsWithSSN, getSinglePatientWithSSN, addPatient };
