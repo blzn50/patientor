@@ -10,23 +10,34 @@ const getPatients = (): Patient[] => {
 };
 
 const getPatientsWithSSN = (): PatientWithoutSSN[] => {
-  return patients.map(({ name, id, occupation, gender, dateOfBirth }) => ({
+  return patients.map(({ name, id, occupation, gender, dateOfBirth, entries }) => ({
     id,
     name,
     occupation,
     gender,
     dateOfBirth,
+    entries,
   }));
 };
 
 const getSinglePatientWithSSN = (id: string): PatientWithoutSSN | undefined => {
-  return patients.find((p) => p.id === id);
+  const patient = patients.find((p) => p.id === id);
+
+  if (!patient) {
+    throw new Error('Patient not found');
+  }
+
+  if (!patient.entries) {
+    patient.entries = [];
+  }
+  return patient;
 };
 
 const addPatient = (entry: NewPatient): Patient => {
   const newPatient = {
     id: randomBytes(8).toString('hex'),
     ...entry,
+    entries: [],
   };
   patients.push(newPatient);
   return newPatient;

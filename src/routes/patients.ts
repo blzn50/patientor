@@ -22,10 +22,10 @@ router.post('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
   const id = req.params.id;
-  const patient = patientService.getSinglePatientWithSSN(id);
-  if (patient) {
+  try {
+    const patient = patientService.getSinglePatientWithSSN(id);
     res.send(patient);
-  } else {
+  } catch (error) {
     res.sendStatus(404);
   }
 });
