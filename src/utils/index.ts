@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { NewPatient, Gender } from '../types'; // => returns boolean
+import { NewPatient, Gender, EntryType, Entry } from '../types';
 
-/* Type Guard */ const isString = (text: any): text is string => {
+/* Type Guard // => returns boolean*/
+const isString = (text: any): text is string => {
   return typeof text === 'string' || text instanceof String;
 };
 
@@ -11,8 +12,16 @@ const isDate = (date: string): boolean => {
   return Boolean(Date.parse(date));
 };
 
+const isSSN = (ssn: any): boolean => {
+  return /^\d{6}-\d{3}[A-Za-z0-9]$/.test(ssn);
+};
+
 const isGender = (gender: any): gender is Gender => {
   return Object.values(Gender).includes(gender);
+};
+
+const isEntryType = (entry: any): entry is Entry => {
+  return Object.values(EntryType).includes(entry.type);
 };
 
 /* Parse inputs */
@@ -24,7 +33,7 @@ const parseName = (name: any): string => {
 };
 
 const parseSSN = (ssn: any): string => {
-  if (!ssn || !isString(ssn)) {
+  if (!ssn || !isString(ssn) || !isSSN(ssn)) {
     throw new Error(`Incorrect or missing SSN: ${ssn}`);
   }
   return ssn;
@@ -51,6 +60,19 @@ const parseGender = (gender: any): Gender => {
   return gender;
 };
 
+const parseEntryType = (entries: any): Entry[] => {
+  if (!entries.length) return [];
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  entries.forEach((entry: any) => {
+    if (!isEntryType(entry)) {
+      throw new Error(`Incorrect or missing entry: ${entry}`);
+    }
+  });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return entries;
+};
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const toNewPatient = (object: any): NewPatient => {
   return {
@@ -59,6 +81,7 @@ const toNewPatient = (object: any): NewPatient => {
     occupation: parseOccupation(object.occupation),
     dateOfBirth: parseDateOfBirth(object.dateOfBirth),
     gender: parseGender(object.gender),
+    entries: parseEntryType(object.entries),
   };
 };
 

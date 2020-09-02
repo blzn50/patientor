@@ -37,7 +37,6 @@ const addPatient = (entry: NewPatient): Patient => {
   const newPatient = {
     id: randomBytes(8).toString('hex'),
     ...entry,
-    entries: [],
   };
   patients.push(newPatient);
   return newPatient;
