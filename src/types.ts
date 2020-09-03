@@ -1,4 +1,4 @@
-export type Diagnose = {
+export type Diagnosis = {
   code: string;
   name: string;
   latin?: string;
@@ -32,7 +32,7 @@ export interface BaseEntry {
   id: string;
   date: string;
   specialist: string;
-  diagnosisCodes?: Array<Diagnose['code']>;
+  diagnosisCodes?: Array<Diagnosis['code']>;
   description: string;
 }
 
