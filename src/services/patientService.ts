@@ -1,7 +1,7 @@
-import { randomBytes } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import patientData from '../../data/patients';
 
-import { Patient, PatientWithoutSSN, NewPatient } from '../types';
+import { Patient, PatientWithoutSSN, NewPatient, NewEntry, Entry } from '../types';
 
 const patients: Array<Patient> = patientData;
 
@@ -33,13 +33,29 @@ const getSinglePatientWithSSN = (id: string): PatientWithoutSSN | undefined => {
   return patient;
 };
 
-const addPatient = (entry: NewPatient): Patient => {
+const addPatient = (patient: NewPatient): Patient => {
   const newPatient = {
-    id: randomBytes(8).toString('hex'),
-    ...entry,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+    id: uuidv4(),
+    ...patient,
   };
   patients.push(newPatient);
   return newPatient;
 };
 
-export default { getPatients, getPatientsWithSSN, getSinglePatientWithSSN, addPatient };
+const addEntry = (patientId: string, entry: NewEntry): Entry => {
+  const patient = patients.find((p) => p.id === patientId);
+  if (!patient) {
+    throw new Error('Patient not found!');
+  }
+
+  const newEntry = {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+    id: uuidv4(),
+    ...entry,
+  };
+  patient.entries.push(newEntry);
+  return newEntry;
+};
+
+export default { getPatients, getPatientsWithSSN, getSinglePatientWithSSN, addPatient, addEntry };

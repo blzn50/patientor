@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { NewPatient, Gender, EntryType, Entry } from '../types';
+import { NewPatient, Gender, EntryType, Entry, NewEntry, HealthCheckRating } from '../types';
 
 /* Type Guard // => returns boolean*/
 const isString = (text: any): text is string => {
@@ -20,16 +20,16 @@ const isGender = (gender: any): gender is Gender => {
   return Object.values(Gender).includes(gender);
 };
 
-const isEntryType = (entry: any): entry is Entry => {
+const isEntry = (entry: any): entry is Entry => {
   return Object.values(EntryType).includes(entry.type);
 };
 
 /* Parse inputs */
-const parseName = (name: any): string => {
-  if (!name || !isString(name)) {
-    throw new Error(`Incorrect or missing name: ${name}`);
+const parseString = (value: any, field: string): string => {
+  if (!value || !isString(value)) {
+    throw new Error(`Incorrect or missing ${field}: ${value}`);
   }
-  return name;
+  return value;
 };
 
 const parseSSN = (ssn: any): string => {
@@ -39,18 +39,11 @@ const parseSSN = (ssn: any): string => {
   return ssn;
 };
 
-const parseOccupation = (occupation: any): string => {
-  if (!occupation || !isString(occupation)) {
-    throw new Error(`Incorrect or missing occupation: ${occupation}`);
+const parseDate = (date: any, field: string): string => {
+  if (!date || !isString(date) || !isDate(date)) {
+    throw new Error(`Incorrect or missing ${field}: ${date}`);
   }
-  return occupation;
-};
-
-const parseDateOfBirth = (dateOfBirth: any): string => {
-  if (!dateOfBirth || !isString(dateOfBirth) || !isDate(dateOfBirth)) {
-    throw new Error(`Incorrect or missing date of birth: ${dateOfBirth}`);
-  }
-  return dateOfBirth;
+  return date;
 };
 
 const parseGender = (gender: any): Gender => {
@@ -60,12 +53,12 @@ const parseGender = (gender: any): Gender => {
   return gender;
 };
 
-const parseEntryType = (entries: any): Entry[] => {
+const parseEntries = (entries: any): Entry[] => {
   if (!entries.length) return [];
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   entries.forEach((entry: any) => {
-    if (!isEntryType(entry)) {
+    if (!isEntry(entry)) {
       throw new Error(`Incorrect or missing entry: ${entry}`);
     }
   });
@@ -73,16 +66,77 @@ const parseEntryType = (entries: any): Entry[] => {
   return entries;
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const toNewPatient = (object: any): NewPatient => {
   return {
-    name: parseName(object.name),
+    name: parseString(object.name, 'name'),
     ssn: parseSSN(object.ssn),
-    occupation: parseOccupation(object.occupation),
-    dateOfBirth: parseDateOfBirth(object.dateOfBirth),
+    occupation: parseString(object.occupation, 'occupation'),
+    dateOfBirth: parseDate(object.dateOfBirth, 'date of birth'),
     gender: parseGender(object.gender),
-    entries: parseEntryType(object.entries),
+    entries: parseEntries(object.entries),
   };
 };
 
-export default toNewPatient;
+/**
+ *
+ *
+ * Entry type checking and parsing
+ *
+ *
+ *
+ */
+
+/* Type Guard */
+const isHealthCheckRating = (type: any): type is HealthCheckRating => {
+  return Object.values(HealthCheckRating).includes(type);
+};
+
+/* Parse fields */
+const parseHealthCheckRating = (type: any): number => {
+  if (!isHealthCheckRating(type)) {
+    throw new Error(`Incorrect or missing health check rating: ${type}`);
+  }
+  return type;
+};
+
+const toNewEntry = (obj: any): NewEntry => {
+  const commonEntry = {
+    date: parseDate(obj.date, 'entry date'),
+    specialist: parseString(obj.specialist, 'entry specialist'),
+    description: parseString(obj.description, 'entry description'),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    diagnosisCodes: obj.diagnosisCodes,
+  };
+
+  switch (obj.type) {
+    case 'Hospital':
+      return {
+        ...commonEntry,
+        type: 'Hospital',
+        discharge: {
+          date: parseDate(obj.discharge.date, 'discharge date'),
+          criteria: parseString(obj.discharge.criteria, 'discharge criteria'),
+        },
+      };
+    case 'OccupationalHealthcare':
+      return {
+        ...commonEntry,
+        type: 'OccupationalHealthcare',
+        employerName: parseString(obj.employerName, 'employer name'),
+        sickLeave: {
+          startDate: parseDate(obj.sickLeave.startDate, 'sick leave start date'),
+          endDate: parseDate(obj.sickLeave.endDate, 'sick leave end date'),
+        },
+      };
+    case 'HealthCheck':
+      return {
+        ...commonEntry,
+        type: 'HealthCheck',
+        healthCheckRating: parseHealthCheckRating(obj.healthCheckRating),
+      };
+    default:
+      throw new Error('Entry type checking failed');
+  }
+};
+
+export { toNewPatient, toNewEntry };
