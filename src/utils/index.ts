@@ -119,20 +119,24 @@ const toNewEntry = (obj: any): NewEntry => {
         },
       };
     case 'OccupationalHealthcare':
+      let sickLeave;
+      if (obj.sickLeave.startDate && obj.sickLeave.endDate) {
+        sickLeave = {
+          startDate: parseDate(obj.sickLeave.startDate, 'sick leave start date'),
+          endDate: parseDate(obj.sickLeave.endDate, 'sick leave end date'),
+        };
+      }
       return {
         ...commonEntry,
         type: 'OccupationalHealthcare',
         employerName: parseString(obj.employerName, 'employer name'),
-        sickLeave: {
-          startDate: parseDate(obj.sickLeave.startDate, 'sick leave start date'),
-          endDate: parseDate(obj.sickLeave.endDate, 'sick leave end date'),
-        },
+        sickLeave,
       };
     case 'HealthCheck':
       return {
         ...commonEntry,
         type: 'HealthCheck',
-        healthCheckRating: parseHealthCheckRating(obj.healthCheckRating),
+        healthCheckRating: parseHealthCheckRating(Number(obj.healthCheckRating)),
       };
     default:
       throw new Error('Entry type checking failed');
